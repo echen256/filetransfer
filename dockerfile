@@ -1,4 +1,6 @@
-FROM node:13.12.0-alpine
+FROM node:15.0.0-alpine
+
+RUN apk add git
 
 # set working directory
 WORKDIR /frontend
