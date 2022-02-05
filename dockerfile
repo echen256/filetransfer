@@ -3,10 +3,10 @@ FROM node:16.0.0-alpine
 RUN apk add git
 
 # set working directory
-WORKDIR /frontend
+WORKDIR /app/frontend
 
 # add `/app/node_modules/.bin` to $PATH
-ENV PATH /frontend/node_modules/.bin:$PATH
+ENV PATH /app/frontend/node_modules/.bin:$PATH
 
 # install app dependencies
 COPY package.json ./
