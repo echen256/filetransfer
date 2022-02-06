@@ -14,6 +14,10 @@ export default function GraphGenerator(props) {
     vertices.push([x,y])
   }
 
+  if (points.length === 0) return {
+
+  }
+  console.log(points)
   //computes the delaunay triangulation of the random points and returns the triangles
   let delaunator = new Delaunator(points);
   let triangles = delaunator.triangles;

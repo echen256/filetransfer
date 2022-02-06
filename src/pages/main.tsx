@@ -15,18 +15,16 @@ import {
 import GraphGenerator from "./../algo/graphGenerator.ts";
 
 function ThreeJS(props) {
-  let { settings } = props;
-  let { min, max, count } = settings;
-  let graph = GraphGenerator({ count, min, max });
+  let { settings , graph} = props;
 
   return (
     <Card className="bp3-elevation-3">
       <Canvas
         style={{
-          left: "-200px",
+        
           height: "1000px",
           width: "1200px",
-          top: "200px",
+
         }}
       >
         <ambientLight />
@@ -50,7 +48,7 @@ function DrawTrianglePoints(graph, settings) {
     var v0 = vertices[i];
     pointGeometry.push(
       <Box
-        key={v0[0] + ":" + v0[1]}
+        key={i}
         position={[v0[0], v0[1], 0]}
         size={[baseSize, baseSize, baseSize]}
       />
@@ -79,7 +77,7 @@ function DrawTrianglePoints(graph, settings) {
     let size = [distance, EdgeThickness, EdgeThickness];
     pointGeometry.push(
       <Box
-        key={Date.now()}
+        key={JSON.stringify(edge)}
         position={pos}
         size={size}
         rotation={[0, 0, sign * angle]}
@@ -104,14 +102,18 @@ export default function Main() {
   const [settings, setSettings] = useState({
     baseSize: 0.5,
     EdgeThickness: 0.25,
-    count: 10,
-    min: 0,
+    count: 30,
+    min: -10 ,
     max: 10,
   });
 
+  
+  let { min, max, count } = settings;
+  let graph = GraphGenerator({ count, min, max });
+
   const updateSettings = (event) => {
       console.log(event.target.id, event.target.value)
-      settings[event.target.id] = event.target.value  
+      settings[event.target.id] = Number(event.target.value)  
       setSettings({...settings})
   }
 
@@ -121,7 +123,7 @@ export default function Main() {
       className="bp3-dark"
     >
       {" "}
-      <Card>
+      <Card style = {{marginLeft:"100px", display : "flex" , flexDirection: "column"}}>
         {" "}
         <h3>Settings </h3>
         <form>
@@ -130,49 +132,59 @@ export default function Main() {
             <InputGroup
               id="count"
               placeholder="Number of points you want to generate"
-              value={settings.count}
-              onChange={updateSettings}
+              defaultValue={settings.count}
+              onBlur={updateSettings}
             />{" "}
           </FormGroup>
           <Divider /> 
           <FormGroup label="Minimum X And Y Values" labelForm="min">
             <InputGroup
               id="min"
-              value = {settings.min}
+              type = "number"
+              defaultValue = {settings.min}
+        
               placeholder= "..."
-              onChange={updateSettings}
+              onBlur={updateSettings}
             />{" "}
           </FormGroup>
           <Divider /> 
           <FormGroup label="Maximum X and Y Values" labelForm="max">
             <InputGroup
               id="max"
-              value = {settings.max}
+              defaultValue = {settings.max}
               placeholder= "..."
-
-              onChange={updateSettings}
+            type = "number"
+        
+              onBlur={updateSettings}
             />{" "}
           </FormGroup>
           <Divider /> 
           <FormGroup label="Edge Thickness" labelForm="EdgeThickness">
             <InputGroup
               id="EdgeThickness"
-              value = {settings.EdgeThickness}
+              defaultValue = {settings.EdgeThickness}
               placeholder= "..."
-              onChange={updateSettings}
+              onBlur={updateSettings}
             />{" "}
           </FormGroup>
           <FormGroup label="Point Thickness" labelForm="baseSize">
             <InputGroup
               id="baseSize"
               placeholder= "..."
-              value = {settings.baseSize}
-              onChange={updateSettings}
+              defaultValue = {settings.baseSize}
+              onBlur={updateSettings}
             />{" "}
           </FormGroup>
         </form>
+
+        <Divider/>
+        <div style = {{flexGrow : 1, display : "flex", flexDirection : "column-reverse"}}>
+            <div style = {{marginTop : "auto"}}>
+                <Button icon = "download" onClick = {() => {}} >Export Graph as JSON</Button>
+            </div>
+        </div>
       </Card>{" "}
-      <ThreeJS settings={settings} />{" "}
+      <ThreeJS settings={settings} graph = {graph} />{" "}
     </div>
   );
 }
