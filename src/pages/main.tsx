@@ -2,14 +2,14 @@ import "@google/model-viewer/dist/model-viewer";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import React, { useRef, useState } from "react";
-import { Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 import {
   Card,
   InputGroup,
   Button,
   Divider,
   Label,
-  FormGroup,
+  FormGroup, Checkbox
 } from "@blueprintjs/core";
 // @ts-ignore
 import GraphGenerator from "./../algo/graphGenerator.ts";
@@ -46,10 +46,13 @@ function DrawTrianglePoints(graph, settings) {
 
   for (var i = 0; i < vertices.length; i++) {
     var v0 = vertices[i];
+
+
+
     pointGeometry.push(
       <Box
         key={i}
-        position={[v0[0], v0[1], 0]}
+        position={[v0[0], v0[1], v0[2]]}
         size={[baseSize, baseSize, baseSize]}
       />
     );
@@ -59,28 +62,24 @@ function DrawTrianglePoints(graph, settings) {
     var edge = edgeMST[i];
     var v0 = vertices[edge[0]];
     var v1 = vertices[edge[1]];
-    var pos = new Vector3((v0[0] + v1[0]) / 2, (v0[1] + v1[1]) / 2, 0);
+    var pos = new Vector3((v0[0] + v1[0]) / 2, (v0[1] + v1[1]) / 2, (v0[2] + v1[2]) / 2 );
 
-    let xAxis = new Vector3(1, 0, 0);
-    let edgeVector = new Vector3(v1[0] - v0[0], v1[1] - v0[1], 0);
-    let angle = Math.acos(
-      xAxis.dot(edgeVector) / Math.abs(edgeVector.length() * xAxis.length())
+    let edgeVector = new Vector3(v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]);
+    let distance = new Vector3(v0[0], v0[1], v0[2]).distanceTo(
+      new Vector3(v1[0], v1[1], v1[2])
     );
-    let distance = new Vector3(v0[0], v0[1], 0).distanceTo(
-      new Vector3(v1[0], v1[1])
-    );
-    let cross = xAxis.cross(edgeVector);
-
-    //computes the sign of the angle, whether it should be rotated clockwise or counterclockwise
-    let sign = Math.sign(cross.z);
 
     let size = [distance, EdgeThickness, EdgeThickness];
+    let quaternion = new Quaternion()
+    quaternion.setFromUnitVectors(new Vector3(1,0,0), edgeVector.normalize())
+     
+      
     pointGeometry.push(
       <Box
-        key={JSON.stringify(edge)}
+        key={i + ":edge"}
         position={pos}
         size={size}
-        rotation={[0, 0, sign * angle]}
+        quaternion = {quaternion}
       />
     );
   }
@@ -92,7 +91,7 @@ function Box(props) {
   const ref = useRef();
   return (
     <mesh {...props} ref={ref} scale={1}>
-      <boxGeometry args={props.size} />
+      <boxGeometry args={props.size}  />
       <meshStandardMaterial color={"orange"} />
     </mesh>
   );
@@ -105,16 +104,23 @@ export default function Main() {
     count: 30,
     min: -10 ,
     max: 10,
+    threeD : false
   });
 
   
   let { min, max, count } = settings;
-  let graph = GraphGenerator({ count, min, max });
+  let graph = GraphGenerator(settings);
 
   const updateSettings = (event) => {
-      console.log(event.target.id, event.target.value)
       settings[event.target.id] = Number(event.target.value)  
       setSettings({...settings})
+  }
+
+  const updateSettingsUnrestricted = (event) => {
+   // console.log(event.target.value, typeof( event.target.checked), event.target.checked, even)
+   console.log(event.target.id, event.target.checked)
+    settings[event.target.id] = event.target.checked
+    setSettings({...settings})
   }
 
   return (
@@ -175,6 +181,14 @@ export default function Main() {
               onBlur={updateSettings}
             />{" "}
           </FormGroup>
+          <FormGroup label="Three Dimensions?" labelForm ="threeD">
+            <Checkbox 
+              defaultValue={settings.threeD}
+              id = "threeD"
+              onClick = {updateSettingsUnrestricted}
+            />
+
+            </FormGroup>
         </form>
 
         <Divider/>

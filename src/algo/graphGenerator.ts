@@ -2,22 +2,24 @@ import Delaunator from "delaunator";
 import Kruskal from "kruskal";
 
 export default function GraphGenerator(props) {
-  let { count, min, max } = props;
+  let { count, min, max , threeD} = props;
+  console.log(threeD)
   let points = [];
   let vertices = []
   //generates a list of random points within min and max
   for (let i = 0; i < count; i++) {
     let x = random(min, max);
     let y = random(min, max);
+    let z = threeD ? random(min,max) : 0
     points.push(x);
     points.push(y);
-    vertices.push([x,y])
+    vertices.push([x,y, z])
   }
 
   if (points.length === 0) return {
 
   }
-  console.log(points)
+
   //computes the delaunay triangulation of the random points and returns the triangles
   let delaunator = new Delaunator(points);
   let triangles = delaunator.triangles;
@@ -52,7 +54,8 @@ export default function GraphGenerator(props) {
 function metric_dist(a, b) {
   var dx = a[0] - b[0];
   var dy = a[1] - b[1];
-  return dx * dx + dy * dy;
+  var dz = a[2] - b[2]
+  return dx * dx + dy * dy  + dz * dz;
 }
 
 //helper for generating random numbers
